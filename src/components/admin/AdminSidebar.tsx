@@ -2,14 +2,29 @@ import { NavLink } from 'react-router-dom';
 import {
   HomeIcon, ShoppingBagIcon, ArchiveBoxIcon,
   ClipboardDocumentListIcon, Squares2X2Icon, MegaphoneIcon,
+  UsersIcon, DocumentArrowUpIcon, SparklesIcon, ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '../../context/AuthContext';
+import type { RolePermissions } from '../../types';
 
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  end?: boolean;
+  permission?: keyof RolePermissions;
+}
+
+const navItems: NavItem[] = [
   { to: '/admin', label: 'Dashboard', icon: HomeIcon, end: true },
-  { to: '/admin/products', label: 'Productos', icon: ShoppingBagIcon },
-  { to: '/admin/inventory', label: 'Inventario', icon: ArchiveBoxIcon },
-  { to: '/admin/orders', label: 'Pedidos', icon: ClipboardDocumentListIcon },
-  { to: '/admin/marketing', label: 'Marketing', icon: MegaphoneIcon },
+  { to: '/admin/products', label: 'Productos', icon: ShoppingBagIcon, permission: 'canViewProducts' },
+  { to: '/admin/products/import', label: 'Importar', icon: DocumentArrowUpIcon, permission: 'canImportProducts' },
+  { to: '/admin/products/ai-generator', label: 'Generador AI', icon: SparklesIcon, permission: 'canCreateProducts' },
+  { to: '/admin/inventory', label: 'Inventario', icon: ArchiveBoxIcon, permission: 'canManageInventory' },
+  { to: '/admin/orders', label: 'Pedidos', icon: ClipboardDocumentListIcon, permission: 'canViewOrders' },
+  { to: '/admin/marketing', label: 'Marketing', icon: MegaphoneIcon, permission: 'canManageBanners' },
+  { to: '/admin/users', label: 'Usuarios', icon: UsersIcon, permission: 'canManageUsers' },
+  { to: '/admin/audit-logs', label: 'Auditoría', icon: ShieldCheckIcon, permission: 'canViewAuditLogs' },
 ];
 
 interface Props {
@@ -18,6 +33,13 @@ interface Props {
 }
 
 export default function AdminSidebar({ open, onClose }: Props) {
+  const { hasPermission, role } = useAuth();
+
+  const visibleItems = navItems.filter(item => {
+    if (!item.permission) return true;
+    return hasPermission(item.permission);
+  });
+
   return (
     <>
       {open && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={onClose} />}
@@ -26,11 +48,11 @@ export default function AdminSidebar({ open, onClose }: Props) {
           <Squares2X2Icon className="w-6 h-6 text-primary-400" />
           <div>
             <p className="font-display font-bold text-primary-400">Melocoton</p>
-            <p className="text-xs text-gray-500">Panel Admin</p>
+            <p className="text-xs text-gray-500">Panel Admin • {role}</p>
           </div>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
+          {visibleItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}

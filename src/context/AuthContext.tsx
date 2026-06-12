@@ -3,13 +3,17 @@ import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getUserData, loginUser, logoutUser, registerUser, sendPasswordReset } from '../firebase/auth';
-import type { User } from '../types';
+import type { User, UserRole, RolePermissions } from '../types';
+import { ROLE_PERMISSIONS } from '../types';
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;
   userProfile: User | null;
   isAdmin: boolean;
   loading: boolean;
+  role: UserRole;
+  permissions: RolePermissions;
+  hasPermission: (permission: keyof RolePermissions) => boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
@@ -37,7 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const isAdmin = userProfile?.role === 'admin';
+  const role: UserRole = userProfile?.role ?? 'CUSTOMER';
+  const permissions = ROLE_PERMISSIONS[role];
+  const isAdmin = permissions.canAccessAdmin;
+
+  const hasPermission = (permission: keyof RolePermissions): boolean => {
+    return permissions[permission];
+  };
 
   const login = async (email: string, password: string) => {
     await loginUser(email, password);
@@ -56,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, userProfile, isAdmin, loading, login, logout, register, forgotPassword }}>
+    <AuthContext.Provider value={{ currentUser, userProfile, isAdmin, loading, role, permissions, hasPermission, login, logout, register, forgotPassword }}>
       {children}
     </AuthContext.Provider>
   );

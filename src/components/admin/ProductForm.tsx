@@ -25,13 +25,20 @@ export default function ProductForm({ initial, onSubmit, loading = false }: Prop
     name: initial?.name ?? '',
     description: initial?.description ?? '',
     category: initial?.category ?? CATEGORIES[0],
+    brand: initial?.brand ?? '',
     publicPrice: initial?.publicPrice ?? 0,
     wholesalePrice: initial?.wholesalePrice ?? 0,
     stock: initial?.stock ?? 0,
     images: initial?.images ?? [],
+    mainImage: initial?.mainImage ?? 0,
     variants: initial?.variants ?? [],
     featured: initial?.featured ?? false,
     active: initial?.active ?? true,
+    color: initial?.color ?? '',
+    size: initial?.size ?? '',
+    tags: initial?.tags ?? [],
+    seoTitle: initial?.seoTitle ?? '',
+    seoDescription: initial?.seoDescription ?? '',
   });
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ProductInput, string>>>({});

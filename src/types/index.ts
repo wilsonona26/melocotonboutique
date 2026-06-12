@@ -1,3 +1,110 @@
+// Roles & Permissions
+export type UserRole = 'CUSTOMER' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN';
+
+export interface RolePermissions {
+  canAccessAdmin: boolean;
+  canViewProducts: boolean;
+  canCreateProducts: boolean;
+  canEditProducts: boolean;
+  canDeleteProducts: boolean;
+  canUploadImages: boolean;
+  canManageInventory: boolean;
+  canViewOrders: boolean;
+  canUpdateOrderStatus: boolean;
+  canManageOrders: boolean;
+  canManageBanners: boolean;
+  canManageCoupons: boolean;
+  canViewReports: boolean;
+  canManageUsers: boolean;
+  canAssignRoles: boolean;
+  canViewAuditLogs: boolean;
+  canManageSettings: boolean;
+  canImportProducts: boolean;
+}
+
+export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
+  CUSTOMER: {
+    canAccessAdmin: false,
+    canViewProducts: true,
+    canCreateProducts: false,
+    canEditProducts: false,
+    canDeleteProducts: false,
+    canUploadImages: false,
+    canManageInventory: false,
+    canViewOrders: false,
+    canUpdateOrderStatus: false,
+    canManageOrders: false,
+    canManageBanners: false,
+    canManageCoupons: false,
+    canViewReports: false,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewAuditLogs: false,
+    canManageSettings: false,
+    canImportProducts: false,
+  },
+  STAFF: {
+    canAccessAdmin: true,
+    canViewProducts: true,
+    canCreateProducts: false,
+    canEditProducts: false,
+    canDeleteProducts: false,
+    canUploadImages: false,
+    canManageInventory: true,
+    canViewOrders: true,
+    canUpdateOrderStatus: true,
+    canManageOrders: false,
+    canManageBanners: false,
+    canManageCoupons: false,
+    canViewReports: false,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewAuditLogs: false,
+    canManageSettings: false,
+    canImportProducts: false,
+  },
+  ADMIN: {
+    canAccessAdmin: true,
+    canViewProducts: true,
+    canCreateProducts: true,
+    canEditProducts: true,
+    canDeleteProducts: true,
+    canUploadImages: true,
+    canManageInventory: true,
+    canViewOrders: true,
+    canUpdateOrderStatus: true,
+    canManageOrders: true,
+    canManageBanners: true,
+    canManageCoupons: true,
+    canViewReports: true,
+    canManageUsers: false,
+    canAssignRoles: false,
+    canViewAuditLogs: false,
+    canManageSettings: false,
+    canImportProducts: true,
+  },
+  SUPER_ADMIN: {
+    canAccessAdmin: true,
+    canViewProducts: true,
+    canCreateProducts: true,
+    canEditProducts: true,
+    canDeleteProducts: true,
+    canUploadImages: true,
+    canManageInventory: true,
+    canViewOrders: true,
+    canUpdateOrderStatus: true,
+    canManageOrders: true,
+    canManageBanners: true,
+    canManageCoupons: true,
+    canViewReports: true,
+    canManageUsers: true,
+    canAssignRoles: true,
+    canViewAuditLogs: true,
+    canManageSettings: true,
+    canImportProducts: true,
+  },
+};
+
 // Product variants
 export interface ProductVariant {
   id: string;
@@ -14,13 +121,20 @@ export interface Product {
   name: string;
   description: string;
   category: string;
+  brand: string;
   publicPrice: number;
   wholesalePrice: number;
   stock: number;
   images: string[];
+  mainImage: number;
   variants: ProductVariant[];
   featured: boolean;
   active: boolean;
+  color: string;
+  size: string;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,8 +204,10 @@ export interface User {
   uid: string;
   email: string;
   displayName: string;
-  role: 'customer' | 'admin';
+  role: UserRole;
+  active: boolean;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 // Inventory
@@ -163,4 +279,65 @@ export interface DashboardStats {
   weeklyRevenue: number;
   lowStockProducts: Product[];
   recentOrders: Order[];
+}
+
+// Audit Log
+export interface AuditLog {
+  id: string;
+  userId: string;
+  userEmail: string;
+  action: string;
+  resource: string;
+  resourceId?: string;
+  details?: string;
+  createdAt: Date;
+}
+
+// Notification
+export interface UserNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'order' | 'stock' | 'promo' | 'system';
+  read: boolean;
+  link?: string;
+  createdAt: Date;
+}
+
+// Product Import
+export interface ProductImportRow {
+  sku: string;
+  code: string;
+  name: string;
+  description: string;
+  category: string;
+  brand: string;
+  publicPrice: number;
+  wholesalePrice: number;
+  stock: number;
+  featured: boolean;
+  active: boolean;
+  color: string;
+  size: string;
+}
+
+export interface ImportValidationResult {
+  row: number;
+  data: ProductImportRow;
+  valid: boolean;
+  errors: string[];
+  isDuplicate: boolean;
+}
+
+// AI Product Generator
+export interface AIProductSuggestion {
+  title: string;
+  description: string;
+  shortDescription: string;
+  whatsappMessage: string;
+  seoTitle: string;
+  seoDescription: string;
+  suggestedCategory: string;
+  suggestedTags: string[];
 }

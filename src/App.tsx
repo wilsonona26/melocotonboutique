@@ -34,6 +34,10 @@ import EditProduct from './pages/admin/EditProduct';
 import Inventory from './pages/admin/Inventory';
 import Orders from './pages/admin/Orders';
 import Marketing from './pages/admin/Marketing';
+import UsersManagement from './pages/admin/UsersManagement';
+import AuditLogs from './pages/admin/AuditLogs';
+import ProductImport from './pages/admin/ProductImport';
+import AIProductGenerator from './pages/admin/AIProductGenerator';
 
 function CustomerLayout() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -80,9 +84,13 @@ export default function App() {
                 <Route path="products" element={<Products />} />
                 <Route path="products/create" element={<CreateProduct />} />
                 <Route path="products/:id/edit" element={<EditProduct />} />
+                <Route path="products/import" element={<ProductImport />} />
+                <Route path="products/ai-generator" element={<AIProductGenerator />} />
                 <Route path="inventory" element={<Inventory />} />
                 <Route path="orders" element={<Orders />} />
                 <Route path="marketing" element={<Marketing />} />
+                <Route path="users" element={<UsersManagement />} />
+                <Route path="audit-logs" element={<AuditLogs />} />
               </Route>
 
               {/* Customer Routes */}

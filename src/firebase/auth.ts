@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './config';
-import type { User } from '../types';
+import type { User, UserRole } from '../types';
 
 export async function registerUser(
   email: string,
@@ -17,12 +17,13 @@ export async function registerUser(
   const credential = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(credential.user, { displayName });
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-  const role = email === adminEmail ? 'admin' : 'customer';
+  const role: UserRole = email === adminEmail ? 'SUPER_ADMIN' : 'CUSTOMER';
   await setDoc(doc(db, 'users', credential.user.uid), {
     uid: credential.user.uid,
     email,
     displayName,
     role,
+    active: true,
     createdAt: serverTimestamp(),
   });
 }
@@ -44,11 +45,17 @@ export async function getUserData(uid: string): Promise<User | null> {
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
   const data = snap.data();
+  // Migrate old role values
+  let role: UserRole = data.role;
+  if (role === 'admin' as unknown) role = 'ADMIN';
+  if (role === 'customer' as unknown) role = 'CUSTOMER';
   return {
     uid: data.uid,
     email: data.email,
     displayName: data.displayName,
-    role: data.role,
+    role,
+    active: data.active ?? true,
     createdAt: data.createdAt?.toDate?.() ?? new Date(),
+    updatedAt: data.updatedAt?.toDate?.() ?? undefined,
   };
 }

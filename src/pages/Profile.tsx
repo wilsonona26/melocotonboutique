@@ -23,9 +23,9 @@ export default function Profile() {
             </div>
             <h2 className="font-display font-bold text-2xl">{userProfile?.displayName || 'Usuario'}</h2>
             <p className="text-white/80 text-sm mt-1">{currentUser?.email}</p>
-            {userProfile?.role === 'admin' && (
+            {userProfile?.role !== 'CUSTOMER' && (
               <span className="inline-block mt-2 bg-white/20 text-white text-xs px-3 py-1 rounded-full">
-                Administrador
+                {userProfile?.role}
               </span>
             )}
           </div>
@@ -42,7 +42,7 @@ export default function Profile() {
               </div>
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Tipo de cuenta</p>
-                <p className="font-medium text-gray-900 capitalize">{userProfile?.role === 'admin' ? 'Administrador' : 'Cliente'}</p>
+                <p className="font-medium text-gray-900 capitalize">{userProfile?.role === 'CUSTOMER' ? 'Cliente' : userProfile?.role ?? 'Cliente'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Miembro desde</p>
