@@ -38,7 +38,7 @@ export default function WishlistButton({ productId, className = '' }: WishlistBu
         setInWishlist(true);
         showToast('Agregado a favoritos ❤️');
       }
-    } catch (err) {
+    } catch {
       showToast('Error al actualizar favoritos', 'error');
     } finally {
       setLoading(false);

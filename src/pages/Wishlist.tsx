@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserWishlist, removeFromWishlist } from '../firebase/wishlist';
@@ -16,12 +16,7 @@ export default function Wishlist() {
   const [items, setItems] = useState<(WishlistItem & { product?: Product })[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    loadWishlist();
-  }, [user]);
-
-  async function loadWishlist() {
+  const loadWishlist = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -33,12 +28,17 @@ export default function Wishlist() {
         })
       );
       setItems(withProducts.filter(i => i.product));
-    } catch (err) {
+    } catch {
       showToast('Error al cargar favoritos', 'error');
     } finally {
       setLoading(false);
     }
-  }
+  }, [user, showToast]);
+
+  useEffect(() => {
+    if (!user) return;
+    loadWishlist();
+  }, [user, loadWishlist]);
 
   async function handleRemove(productId: string) {
     if (!user) return;

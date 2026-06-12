@@ -4,7 +4,8 @@ import { CheckIcon } from '@heroicons/react/24/solid';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../utils/formatters';
-import type { CustomerInfo, ShippingInfo } from '../types';
+import { validateCoupon } from '../firebase/coupons';
+import type { CustomerInfo, ShippingInfo, Coupon } from '../types';
 
 type Step = 1 | 2 | 3;
 
@@ -36,6 +37,10 @@ export default function Checkout() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
 
   if (items.length === 0) {
     navigate('/cart');
@@ -43,7 +48,14 @@ export default function Checkout() {
   }
 
   const shippingCost = totalPrice >= 50 ? 0 : 5;
-  const total = totalPrice + shippingCost;
+
+  const discount = appliedCoupon
+    ? appliedCoupon.discountType === 'percentage'
+      ? Math.round((totalPrice * appliedCoupon.discountValue / 100) * 100) / 100
+      : Math.min(appliedCoupon.discountValue, totalPrice)
+    : 0;
+
+  const total = totalPrice - discount + shippingCost;
 
   const validateStep1 = () => {
     const e: Record<string, string> = {};
@@ -70,9 +82,35 @@ export default function Checkout() {
     setStep(s => (s + 1) as Step);
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError('');
+    try {
+      const result = await validateCoupon(couponCode.trim(), totalPrice);
+      if (result.valid && result.coupon) {
+        setAppliedCoupon(result.coupon);
+        setCouponError('');
+      } else {
+        setCouponError(result.error ?? 'Cupón inválido');
+        setAppliedCoupon(null);
+      }
+    } catch {
+      setCouponError('Error al validar el cupón');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+  };
+
   const handlePayment = () => {
     navigate('/payment', {
-      state: { customer, shipping, shippingCost, total, items }
+      state: { customer, shipping, shippingCost, total, items, discount, couponId: appliedCoupon?.id, couponCode: appliedCoupon?.code }
     });
   };
 
@@ -236,6 +274,11 @@ export default function Checkout() {
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span><span>{formatCurrency(totalPrice)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Descuento ({appliedCoupon?.code})</span><span>-{formatCurrency(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-600">
                   <span>Envío</span>
                   <span className={shippingCost === 0 ? 'text-green-600' : ''}>{shippingCost === 0 ? 'Gratis' : formatCurrency(shippingCost)}</span>
@@ -243,6 +286,36 @@ export default function Checkout() {
                 <div className="flex justify-between font-bold text-base pt-1 border-t">
                   <span>Total</span><span className="text-primary-600">{formatCurrency(total)}</span>
                 </div>
+              </div>
+
+              {/* Coupon */}
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Cupón de descuento</label>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2">
+                    <span className="text-sm text-green-700 font-medium">✅ {appliedCoupon.code} aplicado</span>
+                    <button onClick={handleRemoveCoupon} className="text-xs text-red-500 hover:text-red-700">Quitar</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                      className="input-field flex-1 text-sm"
+                      placeholder="CÓDIGO"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading}
+                      className="btn-outline text-sm px-4"
+                    >
+                      {couponLoading ? '...' : 'Aplicar'}
+                    </button>
+                  </div>
+                )}
+                {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
               </div>
 
               <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-xs text-gray-500">

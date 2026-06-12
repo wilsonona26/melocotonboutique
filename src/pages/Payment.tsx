@@ -4,6 +4,7 @@ import { LockClosedIcon, CreditCardIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { createOrder } from '../firebase/orders';
+import { applyCoupon } from '../firebase/coupons';
 import { formatCurrency } from '../utils/formatters';
 import {
   validateCardNumber, validateExpiryDate, validateCVV, formatCardNumber,
@@ -22,6 +23,9 @@ export default function Payment() {
     shippingCost: number;
     total: number;
     items: CartItem[];
+    discount?: number;
+    couponId?: string;
+    couponCode?: string;
   } | null;
 
   const [card, setCard] = useState({ number: '', holder: '', month: '', year: '', cvv: '', type: 'credit_card' as 'credit_card' | 'debit_card' });
@@ -34,8 +38,8 @@ export default function Payment() {
     return null;
   }
 
-  const { customer, shipping, shippingCost, total, items } = state;
-  const subtotal = total - shippingCost;
+  const { customer, shipping, shippingCost, total, items, discount = 0, couponId, couponCode: appliedCouponCode } = state;
+  const subtotal = total - shippingCost + discount;
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -57,6 +61,12 @@ export default function Payment() {
     const approved = Math.random() < 0.9;
     const lastFour = card.number.replace(/\s/g, '').slice(-4);
 
+    if (!approved) {
+      setErrors({ submit: 'Pago rechazado. Intenta con otra tarjeta o método de pago.' });
+      setProcessing(false);
+      return;
+    }
+
     try {
       const orderId = await createOrder({
         userId: currentUser.uid,
@@ -74,19 +84,25 @@ export default function Payment() {
         })),
         subtotal,
         shipping: shippingCost,
-        discount: 0,
+        discount,
         total,
+        couponCode: appliedCouponCode,
         paymentInfo: {
           method: card.type,
           lastFourDigits: lastFour,
           cardHolder: card.holder,
-          status: approved ? 'approved' : 'rejected',
+          status: 'approved',
         },
-        status: approved ? 'pending' : 'cancelled',
+        status: 'pending',
       });
 
+      // Increment coupon usage if one was applied
+      if (couponId) {
+        await applyCoupon(couponId);
+      }
+
       clearCart();
-      navigate('/order-confirmation', { state: { orderId, approved, total } });
+      navigate('/order-confirmation', { state: { orderId, approved: true, total } });
     } catch (err) {
       console.error(err);
       setErrors({ submit: 'Error al procesar el pago. Intenta de nuevo.' });
@@ -268,6 +284,11 @@ export default function Payment() {
               <hr className="my-4 border-gray-100" />
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Descuento{appliedCouponCode ? ` (${appliedCouponCode})` : ''}</span><span>-{formatCurrency(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-600">
                   <span>Envío</span>
                   <span className={shippingCost === 0 ? 'text-green-600' : ''}>{shippingCost === 0 ? 'Gratis' : formatCurrency(shippingCost)}</span>

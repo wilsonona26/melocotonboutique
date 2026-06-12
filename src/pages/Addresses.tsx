@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserAddresses, addAddress, deleteAddress, setDefaultAddress } from '../firebase/addresses';
 import type { SavedAddress } from '../types';
@@ -13,11 +13,7 @@ export default function Addresses() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
-  useEffect(() => {
-    if (user) loadAddresses();
-  }, [user]);
-
-  async function loadAddresses() {
+  const loadAddresses = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -28,7 +24,11 @@ export default function Addresses() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [user, showToast]);
+
+  useEffect(() => {
+    if (user) loadAddresses();
+  }, [user, loadAddresses]);
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

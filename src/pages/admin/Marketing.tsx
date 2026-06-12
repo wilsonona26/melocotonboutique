@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getAllCoupons, createCoupon, deleteCoupon, updateCoupon } from '../../firebase/coupons';
 import { getAllBanners, createBanner, deleteBanner, updateBanner } from '../../firebase/banners';
 import type { Coupon, PromoBanner } from '../../types';
@@ -15,22 +15,22 @@ export default function Marketing() {
   const [showBannerForm, setShowBannerForm] = useState(false);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [c, b] = await Promise.all([getAllCoupons(), getAllBanners()]);
       setCoupons(c);
       setBanners(b);
-    } catch (err) {
+    } catch {
       showToast('Error al cargar datos', 'error');
     } finally {
       setLoading(false);
     }
-  }
+  }, [showToast]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   async function handleCreateCoupon(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

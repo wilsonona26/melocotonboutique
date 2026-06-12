@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Product, ProductVariant } from '../../types';
 import { uploadProductImage, deleteProductImage } from '../../firebase/storage';
 import ImageUploader from '../common/ImageUploader';
@@ -15,6 +15,8 @@ interface Props {
   onSubmit: (data: ProductInput) => Promise<void>;
   loading?: boolean;
 }
+
+let tempCounter = 0;
 
 export default function ProductForm({ initial, onSubmit, loading = false }: Props) {
   const [form, setForm] = useState<ProductInput>({
@@ -35,7 +37,8 @@ export default function ProductForm({ initial, onSubmit, loading = false }: Prop
   const [errors, setErrors] = useState<Partial<Record<keyof ProductInput, string>>>({});
   const [showVariants, setShowVariants] = useState((initial?.variants?.length ?? 0) > 0);
 
-  const tempId = initial?.id ?? 'temp_' + Date.now();
+  const tempIdRef = useRef(initial?.id ?? 'temp_' + (++tempCounter));
+  const tempId = tempIdRef.current;
 
   const set = (key: keyof ProductInput, value: unknown) => {
     setForm(prev => ({ ...prev, [key]: value }));
