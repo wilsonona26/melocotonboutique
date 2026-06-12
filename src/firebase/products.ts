@@ -11,6 +11,7 @@ function toProduct(id: string, data: Record<string, unknown>): Product {
   return {
     id,
     code: data.code as string,
+    sku: (data.sku as string) ?? '',
     name: data.name as string,
     description: data.description as string,
     category: data.category as string,
@@ -18,6 +19,8 @@ function toProduct(id: string, data: Record<string, unknown>): Product {
     wholesalePrice: data.wholesalePrice as number,
     stock: data.stock as number,
     images: (data.images as string[]) ?? [],
+    variants: (data.variants as Product['variants']) ?? [],
+    featured: (data.featured as boolean) ?? false,
     active: data.active as boolean ?? true,
     createdAt: (data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date()),
     updatedAt: (data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date()),
@@ -67,6 +70,18 @@ export async function searchProducts(searchQuery: string): Promise<Product[]> {
   return all.filter(p =>
     p.name.toLowerCase().includes(q) ||
     p.description.toLowerCase().includes(q) ||
-    p.code.toLowerCase().includes(q)
+    p.code.toLowerCase().includes(q) ||
+    (p.sku && p.sku.toLowerCase().includes(q))
   );
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  const q = query(col, where('active', '==', true), where('featured', '==', true), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => toProduct(d.id, d.data() as Record<string, unknown>));
+}
+
+export async function getLowStockProducts(threshold = 5): Promise<Product[]> {
+  const all = await getAllProducts();
+  return all.filter(p => p.stock <= threshold && p.active);
 }

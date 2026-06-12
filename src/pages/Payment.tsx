@@ -74,6 +74,7 @@ export default function Payment() {
         })),
         subtotal,
         shipping: shippingCost,
+        discount: 0,
         total,
         paymentInfo: {
           method: card.type,

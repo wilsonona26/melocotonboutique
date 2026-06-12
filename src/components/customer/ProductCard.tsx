@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBagIcon, HeartIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
+import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import type { Product } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
+import WishlistButton from './WishlistButton';
 
 interface Props {
   product: Product;
@@ -12,7 +12,6 @@ interface Props {
 
 export default function ProductCard({ product }: Props) {
   const { addToCart } = useCart();
-  const [wished, setWished] = useState(false);
   const [added, setAdded] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -43,15 +42,10 @@ export default function ProductCard({ product }: Props) {
           {product.stock > 0 && product.stock <= 5 && (
             <span className="absolute top-2 left-2 badge badge-warning text-xs">Últimas {product.stock}</span>
           )}
-          <button
-            onClick={(e) => { e.preventDefault(); setWished(!wished); }}
-            className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full hover:bg-white transition-colors shadow-sm"
-          >
-            {wished
-              ? <HeartSolid className="w-4 h-4 text-red-500" />
-              : <HeartIcon className="w-4 h-4 text-gray-500" />
-            }
-          </button>
+          {product.featured && (
+            <span className="absolute top-2 left-2 badge badge-primary text-xs">⭐ Destacado</span>
+          )}
+          <WishlistButton productId={product.id} className="absolute top-2 right-2 shadow-sm" />
           <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               onClick={handleAddToCart}
@@ -70,7 +64,7 @@ export default function ProductCard({ product }: Props) {
 
         {/* Info */}
         <div className="p-4">
-          <p className="text-xs text-gray-400 mb-1">{product.category} · {product.code}</p>
+          <p className="text-xs text-gray-400 mb-1">{product.category} · {product.sku || product.code}</p>
           <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2 text-sm leading-snug mb-2">
             {product.name}
           </h3>

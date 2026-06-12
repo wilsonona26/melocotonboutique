@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import type { Product } from '../../types';
 import { updateStock } from '../../firebase/products';
+import { addInventoryMovement } from '../../firebase/inventory';
 import { formatCurrency } from '../../utils/formatters';
+import { useToast } from '../common/Toast';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   products: Product[];
@@ -11,15 +14,32 @@ interface Props {
 export default function InventoryManager({ products, onRefresh }: Props) {
   const [editing, setEditing] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const { currentUser } = useAuth();
+  const { showToast } = useToast();
 
-  const handleSave = async (productId: string) => {
-    const newQty = editing[productId];
+  const handleSave = async (product: Product) => {
+    const newQty = editing[product.id];
     if (newQty === undefined || newQty < 0) return;
-    setSaving(productId);
+    setSaving(product.id);
     try {
-      await updateStock(productId, newQty);
+      await updateStock(product.id, newQty);
+      // Log inventory movement
+      const diff = newQty - product.stock;
+      await addInventoryMovement({
+        productId: product.id,
+        productName: product.name,
+        type: diff > 0 ? 'in' : diff < 0 ? 'out' : 'adjustment',
+        quantity: Math.abs(diff),
+        previousStock: product.stock,
+        newStock: newQty,
+        reason: 'Ajuste manual de inventario',
+        createdBy: currentUser?.email || 'admin',
+      });
+      showToast(`Stock actualizado: ${product.name}`);
       onRefresh();
-      setEditing(prev => { const n = { ...prev }; delete n[productId]; return n; });
+      setEditing(prev => { const n = { ...prev }; delete n[product.id]; return n; });
+    } catch {
+      showToast('Error al actualizar stock', 'error');
     } finally {
       setSaving(null);
     }
@@ -82,7 +102,7 @@ export default function InventoryManager({ products, onRefresh }: Props) {
                     {isEditing ? (
                       <>
                         <button
-                          onClick={() => handleSave(product.id)}
+                          onClick={() => handleSave(product)}
                           disabled={saving === product.id}
                           className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
                         >

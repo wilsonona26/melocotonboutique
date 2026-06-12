@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './components/common/Toast';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import AdminRoute from './components/common/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
@@ -22,6 +23,8 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import OrderHistory from './pages/OrderHistory';
+import Wishlist from './pages/Wishlist';
+import Addresses from './pages/Addresses';
 
 // Admin Pages
 import Dashboard from './pages/admin/Dashboard';
@@ -30,6 +33,7 @@ import CreateProduct from './pages/admin/CreateProduct';
 import EditProduct from './pages/admin/EditProduct';
 import Inventory from './pages/admin/Inventory';
 import Orders from './pages/admin/Orders';
+import Marketing from './pages/admin/Marketing';
 
 function CustomerLayout() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -51,6 +55,8 @@ function CustomerLayout() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/addresses" element={<ProtectedRoute><Addresses /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />
@@ -63,23 +69,26 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <Routes>
-            {/* Admin Routes */}
-            <Route
-              path="/admin"
-              element={<AdminRoute><AdminLayout /></AdminRoute>}
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="products" element={<Products />} />
-              <Route path="products/create" element={<CreateProduct />} />
-              <Route path="products/:id/edit" element={<EditProduct />} />
-              <Route path="inventory" element={<Inventory />} />
-              <Route path="orders" element={<Orders />} />
-            </Route>
+          <ToastProvider>
+            <Routes>
+              {/* Admin Routes */}
+              <Route
+                path="/admin"
+                element={<AdminRoute><AdminLayout /></AdminRoute>}
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="products" element={<Products />} />
+                <Route path="products/create" element={<CreateProduct />} />
+                <Route path="products/:id/edit" element={<EditProduct />} />
+                <Route path="inventory" element={<Inventory />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="marketing" element={<Marketing />} />
+              </Route>
 
-            {/* Customer Routes */}
-            <Route path="/*" element={<CustomerLayout />} />
-          </Routes>
+              {/* Customer Routes */}
+              <Route path="/*" element={<CustomerLayout />} />
+            </Routes>
+          </ToastProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

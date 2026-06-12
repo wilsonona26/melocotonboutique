@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react';
-import type { Product } from '../../types';
+import type { Product, ProductVariant } from '../../types';
 import { uploadProductImage, deleteProductImage } from '../../firebase/storage';
 import ImageUploader from '../common/ImageUploader';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const CATEGORIES = ['Ropa', 'Accesorios', 'Calzado', 'Bolsos', 'Joyería'];
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Único'];
+const COLORS = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Rosa', 'Beige', 'Marrón', 'Gris', 'Amarillo', 'Naranja', 'Morado'];
 
 type ProductInput = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
 
@@ -16,6 +19,7 @@ interface Props {
 export default function ProductForm({ initial, onSubmit, loading = false }: Props) {
   const [form, setForm] = useState<ProductInput>({
     code: initial?.code ?? '',
+    sku: initial?.sku ?? '',
     name: initial?.name ?? '',
     description: initial?.description ?? '',
     category: initial?.category ?? CATEGORIES[0],
@@ -23,10 +27,13 @@ export default function ProductForm({ initial, onSubmit, loading = false }: Prop
     wholesalePrice: initial?.wholesalePrice ?? 0,
     stock: initial?.stock ?? 0,
     images: initial?.images ?? [],
+    variants: initial?.variants ?? [],
+    featured: initial?.featured ?? false,
     active: initial?.active ?? true,
   });
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ProductInput, string>>>({});
+  const [showVariants, setShowVariants] = useState((initial?.variants?.length ?? 0) > 0);
 
   const tempId = initial?.id ?? 'temp_' + Date.now();
 
@@ -61,6 +68,28 @@ export default function ProductForm({ initial, onSubmit, loading = false }: Prop
     await deleteProductImage(url);
   }, []);
 
+  const addVariant = () => {
+    const newVariant: ProductVariant = {
+      id: Date.now().toString(),
+      size: SIZES[0],
+      color: COLORS[0],
+      stock: 0,
+      sku: '',
+    };
+    setForm(prev => ({ ...prev, variants: [...prev.variants, newVariant] }));
+  };
+
+  const updateVariant = (index: number, field: keyof ProductVariant, value: string | number) => {
+    setForm(prev => ({
+      ...prev,
+      variants: prev.variants.map((v, i) => i === index ? { ...v, [field]: value } : v),
+    }));
+  };
+
+  const removeVariant = (index: number) => {
+    setForm(prev => ({ ...prev, variants: prev.variants.filter((_, i) => i !== index) }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -84,6 +113,18 @@ export default function ProductForm({ initial, onSubmit, loading = false }: Prop
             placeholder="EJ: VEST-001"
           />
           {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code}</p>}
+        </div>
+
+        {/* SKU */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+          <input
+            type="text"
+            value={form.sku}
+            onChange={e => set('sku', e.target.value.toUpperCase())}
+            className="input-field"
+            placeholder="EJ: MB-VEST-001-BLK"
+          />
         </div>
 
         {/* Category */}
@@ -170,28 +211,102 @@ export default function ProductForm({ initial, onSubmit, loading = false }: Prop
           {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock}</p>}
         </div>
 
-        {/* Active */}
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="active"
-            checked={form.active}
-            onChange={e => set('active', e.target.checked)}
-            className="w-4 h-4 text-primary-500 rounded"
-          />
-          <label htmlFor="active" className="text-sm font-medium text-gray-700">Producto activo (visible en tienda)</label>
+        {/* Featured & Active */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="featured"
+              checked={form.featured}
+              onChange={e => set('featured', e.target.checked)}
+              className="w-4 h-4 text-primary-500 rounded"
+            />
+            <label htmlFor="featured" className="text-sm font-medium text-gray-700">⭐ Producto destacado</label>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="active"
+              checked={form.active}
+              onChange={e => set('active', e.target.checked)}
+              className="w-4 h-4 text-primary-500 rounded"
+            />
+            <label htmlFor="active" className="text-sm font-medium text-gray-700">Producto activo (visible en tienda)</label>
+          </div>
         </div>
       </div>
 
       {/* Images */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Imágenes del Producto</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Imágenes del Producto (múltiples)</label>
         <ImageUploader
           images={form.images}
           onUpload={handleUpload}
           onRemove={handleRemoveImage}
           uploading={uploading}
         />
+        <p className="text-xs text-gray-400 mt-1">Puedes subir múltiples imágenes. La primera será la imagen principal.</p>
+      </div>
+
+      {/* Variants */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="block text-sm font-medium text-gray-700">Variantes (Talla y Color)</label>
+          <button
+            type="button"
+            onClick={() => setShowVariants(!showVariants)}
+            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+          >
+            {showVariants ? 'Ocultar variantes' : 'Agregar variantes'}
+          </button>
+        </div>
+        {showVariants && (
+          <div className="space-y-3 bg-gray-50 rounded-xl p-4">
+            {form.variants.map((variant, index) => (
+              <div key={variant.id} className="flex flex-wrap items-center gap-3 bg-white rounded-lg p-3 border border-gray-100">
+                <select
+                  value={variant.size}
+                  onChange={e => updateVariant(index, 'size', e.target.value)}
+                  className="input-field text-sm py-1.5 w-24"
+                >
+                  {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <select
+                  value={variant.color}
+                  onChange={e => updateVariant(index, 'color', e.target.value)}
+                  className="input-field text-sm py-1.5 w-28"
+                >
+                  {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  value={variant.stock}
+                  onChange={e => updateVariant(index, 'stock', parseInt(e.target.value) || 0)}
+                  placeholder="Stock"
+                  className="input-field text-sm py-1.5 w-20"
+                />
+                <input
+                  type="text"
+                  value={variant.sku}
+                  onChange={e => updateVariant(index, 'sku', e.target.value.toUpperCase())}
+                  placeholder="SKU variante"
+                  className="input-field text-sm py-1.5 flex-1 min-w-[120px]"
+                />
+                <button type="button" onClick={() => removeVariant(index)} className="p-1.5 text-red-400 hover:text-red-600">
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addVariant}
+              className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              <PlusIcon className="w-4 h-4" /> Agregar variante
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-3 pt-2">

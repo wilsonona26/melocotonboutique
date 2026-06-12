@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
-import { getProducts } from '../firebase/products';
+import { getProducts, getFeaturedProducts } from '../firebase/products';
 import type { Product } from '../types';
 import ProductCard from '../components/customer/ProductCard';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import PromoBannerSlider from '../components/customer/PromoBannerSlider';
+import { ProductGridSkeleton } from '../components/common/LoadingSkeleton';
 
 const CATEGORIES = [
   { name: 'Ropa', icon: '👗', desc: 'Vestidos, blusas, faldas y más' },
@@ -19,14 +20,24 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProducts()
-      .then(products => setFeatured(products.slice(0, 8)))
+    getFeaturedProducts()
+      .then(products => {
+        if (products.length > 0) {
+          setFeatured(products.slice(0, 8));
+        } else {
+          // Fallback to recent products if no featured ones
+          return getProducts().then(p => setFeatured(p.slice(0, 8)));
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="min-h-screen">
+      {/* Promotional Banners */}
+      <PromoBannerSlider />
+
       {/* Hero */}
       <section className="gradient-hero py-20 px-4">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
@@ -113,7 +124,7 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <LoadingSpinner />
+            <ProductGridSkeleton />
           ) : featured.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <p className="text-5xl mb-4">🛍️</p>

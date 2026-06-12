@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingBagIcon, MagnifyingGlassIcon, Bars3Icon, XMarkIcon,
   UserCircleIcon, ArrowRightOnRectangleIcon, UserIcon, ClipboardDocumentListIcon,
-  Cog6ToothIcon,
+  Cog6ToothIcon, HeartIcon, MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -106,6 +106,14 @@ export default function Navbar({ onCartOpen }: Props) {
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors">
                       <ClipboardDocumentListIcon className="w-4 h-4" /> Mis Pedidos
                     </Link>
+                    <Link to="/wishlist" onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors">
+                      <HeartIcon className="w-4 h-4" /> Favoritos
+                    </Link>
+                    <Link to="/addresses" onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 transition-colors">
+                      <MapPinIcon className="w-4 h-4" /> Mis Direcciones
+                    </Link>
                     {isAdmin && (
                       <Link to="/admin" onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 transition-colors font-medium">
@@ -153,6 +161,8 @@ export default function Navbar({ onCartOpen }: Props) {
               <>
                 <Link to="/profile" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Mi Perfil</Link>
                 <Link to="/orders" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Mis Pedidos</Link>
+                <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Favoritos</Link>
+                <Link to="/addresses" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Mis Direcciones</Link>
                 {isAdmin && <Link to="/admin" onClick={() => setMobileOpen(false)} className="block py-2 text-primary-600 font-medium">Administración</Link>}
                 <button onClick={handleLogout} className="block w-full text-left py-2 text-red-600">Cerrar Sesión</button>
               </>

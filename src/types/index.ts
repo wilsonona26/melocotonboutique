@@ -1,6 +1,16 @@
+// Product variants
+export interface ProductVariant {
+  id: string;
+  size: string;
+  color: string;
+  stock: number;
+  sku: string;
+}
+
 export interface Product {
   id: string;
   code: string;
+  sku: string;
   name: string;
   description: string;
   category: string;
@@ -8,6 +18,8 @@ export interface Product {
   wholesalePrice: number;
   stock: number;
   images: string[];
+  variants: ProductVariant[];
+  featured: boolean;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -16,6 +28,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedVariant?: ProductVariant;
 }
 
 export interface Order {
@@ -27,9 +40,13 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   shipping: number;
+  discount: number;
   total: number;
   paymentInfo: PaymentInfo;
   status: OrderStatus;
+  trackingNumber?: string;
+  notes?: string;
+  couponCode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +59,7 @@ export interface OrderItem {
   quantity: number;
   subtotal: number;
   image: string;
+  variant?: string;
 }
 
 export interface CustomerInfo {
@@ -74,4 +92,75 @@ export interface User {
   displayName: string;
   role: 'customer' | 'admin';
   createdAt: Date;
+}
+
+// Inventory
+export interface InventoryMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  type: 'in' | 'out' | 'adjustment';
+  quantity: number;
+  previousStock: number;
+  newStock: number;
+  reason: string;
+  createdAt: Date;
+  createdBy: string;
+}
+
+// Marketing
+export interface Coupon {
+  id: string;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minOrderAmount: number;
+  maxUses: number;
+  currentUses: number;
+  active: boolean;
+  expiresAt: Date;
+  createdAt: Date;
+}
+
+export interface PromoBanner {
+  id: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  linkUrl: string;
+  active: boolean;
+  order: number;
+  createdAt: Date;
+}
+
+// Customer
+export interface WishlistItem {
+  id: string;
+  userId: string;
+  productId: string;
+  createdAt: Date;
+}
+
+export interface SavedAddress {
+  id: string;
+  userId: string;
+  label: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  isDefault: boolean;
+}
+
+// Dashboard
+export interface DashboardStats {
+  totalOrders: number;
+  totalRevenue: number;
+  totalCustomers: number;
+  pendingOrders: number;
+  monthlyRevenue: number;
+  weeklyRevenue: number;
+  lowStockProducts: Product[];
+  recentOrders: Order[];
 }

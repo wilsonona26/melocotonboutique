@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   HomeIcon, ShoppingBagIcon, ArchiveBoxIcon,
-  ClipboardDocumentListIcon, Squares2X2Icon,
+  ClipboardDocumentListIcon, Squares2X2Icon, MegaphoneIcon,
 } from '@heroicons/react/24/outline';
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { to: '/admin/products', label: 'Productos', icon: ShoppingBagIcon },
   { to: '/admin/inventory', label: 'Inventario', icon: ArchiveBoxIcon },
   { to: '/admin/orders', label: 'Pedidos', icon: ClipboardDocumentListIcon },
+  { to: '/admin/marketing', label: 'Marketing', icon: MegaphoneIcon },
 ];
 
 interface Props {
