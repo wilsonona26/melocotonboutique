@@ -20,8 +20,15 @@ export function validateExpiryDate(month: string, year: string): boolean {
   const y = parseInt(year, 10);
   if (isNaN(m) || isNaN(y) || m < 1 || m > 12) return false;
   const now = new Date();
-  const expiry = new Date(2000 + y, m - 1, 1);
-  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentYear = now.getFullYear();
+  // Support both 2-digit and 4-digit years using a sliding window:
+  // treat 2-digit years as belonging to the century that minimises past dates
+  const fullYear =
+    y < 100
+      ? currentYear - (currentYear % 100) + y + (y + (currentYear % 100) < -50 ? 100 : 0)
+      : y;
+  const expiry = new Date(fullYear, m - 1, 1);
+  const thisMonth = new Date(currentYear, now.getMonth(), 1);
   return expiry >= thisMonth;
 }
 
