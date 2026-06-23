@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { auth } from '../firebase/config';
 
 export default function Login() {
   const { login, loginWithGoogle } = useAuth();
@@ -43,7 +44,13 @@ export default function Login() {
     setLoading(true);
     try {
       await loginWithGoogle();
-      navigate(from, { replace: true });
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+      const currentEmail = auth.currentUser?.email;
+      if (currentEmail === adminEmail) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       if (code === 'auth/popup-closed-by-user') {
