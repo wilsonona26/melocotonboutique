@@ -32,9 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        console.log('[AuthContext] Auth state changed - user:', user.email);
         const profile = await getUserData(user.uid);
+        console.log('[AuthContext] User profile loaded:', profile);
         setUserProfile(profile);
       } else {
+        console.log('[AuthContext] Auth state changed - no user');
         setUserProfile(null);
       }
       setLoading(false);

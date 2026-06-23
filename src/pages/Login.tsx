@@ -53,10 +53,14 @@ export default function Login() {
       }
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
+      const message = (err as { message?: string })?.message;
+      console.error('[Login] Google login error:', code, message);
       if (code === 'auth/popup-closed-by-user') {
         // User closed popup, no error needed
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('Este dominio no está autorizado para Google Sign-In. Verifica la configuración en Firebase Console.');
       } else {
-        setError('Error al iniciar sesión con Google.');
+        setError(`Error al iniciar sesión con Google: ${code || message || 'Error desconocido'}`);
       }
     } finally {
       setLoading(false);
