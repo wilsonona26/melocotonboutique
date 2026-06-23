@@ -21,19 +21,19 @@
     @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
   }
   .btn-secondary {
-    @apply bg-secondary-100 hover:bg-secondary-200 text-primary-700 font-semibold py-2.5 px-6 rounded-lg transition-all duration-200;
+    @apply bg-secondary-800 hover:bg-secondary-900 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200;
   }
   .btn-outline {
-    @apply border-2 border-primary-500 text-primary-600 hover:bg-primary-50 font-semibold py-2.5 px-6 rounded-lg transition-all duration-200;
+    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-50 font-semibold py-2.5 px-6 rounded-lg transition-all duration-200;
   }
   .btn-ghost {
-    @apply text-gray-600 hover:text-primary-600 hover:bg-primary-50 font-medium py-2 px-4 rounded-lg transition-all duration-200;
+    @apply text-gray-600 hover:text-primary-500 hover:bg-primary-50 font-medium py-2 px-4 rounded-lg transition-all duration-200;
   }
   .input-field {
     @apply w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200 bg-white;
   }
   .card {
-    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden;
+    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100;
   }
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
@@ -63,13 +63,13 @@
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, #F4A261 0%, #E76F51 100%);
+    background: linear-gradient(135deg, #FF008C 0%, #000000 100%);
   }
   .gradient-hero {
-    background: linear-gradient(135deg, #FFF5EE 0%, #FDE8E8 50%, #FFE8D6 100%);
+    background: linear-gradient(135deg, #000000 0%, #1A1A1A 50%, #0D0D0D 100%);
   }
   .text-gradient {
-    background: linear-gradient(135deg, #E76F51, #D4AF37);
+    background: linear-gradient(135deg, #FF008C, #FF47A0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import logoDark from '../../assets/logo-dark.svg';
 
 interface Props {
   onCartOpen?: () => void;
@@ -36,22 +37,18 @@ export default function Navbar({ onCartOpen }: Props) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-primary-100">
+    <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-md shadow-sm border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-2xl">🍑</span>
-            <div>
-              <span className="font-display font-bold text-lg text-primary-600 leading-none block">Melocoton</span>
-              <span className="text-xs text-gray-400 leading-none block tracking-widest uppercase">Boutique</span>
-            </div>
+            <img src={logoDark} alt="Melocoton Boutique" className="h-10" />
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Inicio</Link>
-            <Link to="/catalog" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Catálogo</Link>
+            <Link to="/" className="text-gray-300 hover:text-primary-500 font-medium transition-colors">Inicio</Link>
+            <Link to="/catalog" className="text-gray-300 hover:text-primary-500 font-medium transition-colors">Catálogo</Link>
           </nav>
 
           {/* Search + Actions */}
@@ -64,16 +61,16 @@ export default function Navbar({ onCartOpen }: Props) {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Buscar productos..."
-                  className="pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-300 w-48 focus:w-64 transition-all"
+                  className="pl-9 pr-4 py-1.5 text-sm border border-gray-700 bg-gray-900 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 w-48 focus:w-64 transition-all placeholder-gray-500"
                 />
-                <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               </div>
             </form>
 
             {/* Cart */}
             <button
               onClick={onCartOpen}
-              className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors"
+              className="relative p-2 text-gray-300 hover:text-primary-500 transition-colors"
               aria-label="Carrito"
             >
               <ShoppingBagIcon className="w-6 h-6" />
@@ -89,7 +86,7 @@ export default function Navbar({ onCartOpen }: Props) {
               <div className="relative hidden md:block">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors p-1"
+                  className="flex items-center gap-2 text-gray-300 hover:text-primary-500 transition-colors p-1"
                 >
                   <UserCircleIcon className="w-7 h-7" />
                   <span className="text-sm font-medium max-w-[100px] truncate">
@@ -116,7 +113,7 @@ export default function Navbar({ onCartOpen }: Props) {
                     </Link>
                     {isAdmin && (
                       <Link to="/admin" onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 transition-colors font-medium">
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-primary-500 hover:bg-primary-50 transition-colors font-medium">
                         <Cog6ToothIcon className="w-4 h-4" /> Administración
                       </Link>
                     )}
@@ -130,13 +127,13 @@ export default function Navbar({ onCartOpen }: Props) {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Link to="/login" className="btn-ghost text-sm py-1.5 px-3">Ingresar</Link>
+                <Link to="/login" className="text-gray-300 hover:text-white text-sm font-medium py-1.5 px-3 transition-colors">Ingresar</Link>
                 <Link to="/register" className="btn-primary text-sm py-1.5 px-3">Registrarse</Link>
               </div>
             )}
 
             {/* Mobile menu button */}
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-600">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-300">
               {mobileOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
             </button>
           </div>
@@ -144,27 +141,27 @@ export default function Navbar({ onCartOpen }: Props) {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 space-y-3 animate-fade-in">
+          <div className="md:hidden py-4 border-t border-gray-800 space-y-3 animate-fade-in">
             <form onSubmit={handleSearch} className="flex items-center relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..."
-                className="input-field pl-9 py-2 text-sm"
+                className="w-full border border-gray-700 bg-gray-900 text-white rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-500"
               />
-              <MagnifyingGlassIcon className="absolute left-3 w-4 h-4 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 w-4 h-4 text-gray-500" />
             </form>
-            <Link to="/" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700 font-medium">Inicio</Link>
-            <Link to="/catalog" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700 font-medium">Catálogo</Link>
+            <Link to="/" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-200 font-medium">Inicio</Link>
+            <Link to="/catalog" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-200 font-medium">Catálogo</Link>
             {currentUser ? (
               <>
-                <Link to="/profile" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Mi Perfil</Link>
-                <Link to="/orders" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Mis Pedidos</Link>
-                <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Favoritos</Link>
-                <Link to="/addresses" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-700">Mis Direcciones</Link>
-                {isAdmin && <Link to="/admin" onClick={() => setMobileOpen(false)} className="block py-2 text-primary-600 font-medium">Administración</Link>}
-                <button onClick={handleLogout} className="block w-full text-left py-2 text-red-600">Cerrar Sesión</button>
+                <Link to="/profile" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-300">Mi Perfil</Link>
+                <Link to="/orders" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-300">Mis Pedidos</Link>
+                <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-300">Favoritos</Link>
+                <Link to="/addresses" onClick={() => setMobileOpen(false)} className="block py-2 text-gray-300">Mis Direcciones</Link>
+                {isAdmin && <Link to="/admin" onClick={() => setMobileOpen(false)} className="block py-2 text-primary-500 font-medium">Administración</Link>}
+                <button onClick={handleLogout} className="block w-full text-left py-2 text-red-400">Cerrar Sesión</button>
               </>
             ) : (
               <div className="flex gap-2 pt-2">

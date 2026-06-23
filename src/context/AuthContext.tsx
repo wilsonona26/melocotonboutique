@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { getUserData, loginUser, logoutUser, registerUser, sendPasswordReset } from '../firebase/auth';
+import { getUserData, loginUser, logoutUser, registerUser, sendPasswordReset, loginWithGoogle as firebaseLoginWithGoogle } from '../firebase/auth';
 import type { User, UserRole, RolePermissions } from '../types';
 import { ROLE_PERMISSIONS } from '../types';
 
@@ -15,6 +15,7 @@ interface AuthContextType {
   permissions: RolePermissions;
   hasPermission: (permission: keyof RolePermissions) => boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const role: UserRole = userProfile?.role ?? 'CUSTOMER';
   const permissions = ROLE_PERMISSIONS[role];
-  const isAdmin = permissions.canAccessAdmin;
+  const isAdmin = role === 'SUPER_ADMIN';
 
   const hasPermission = (permission: keyof RolePermissions): boolean => {
     return permissions[permission];
@@ -51,6 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     await loginUser(email, password);
+  };
+
+  const loginWithGoogle = async () => {
+    await firebaseLoginWithGoogle();
   };
 
   const logout = async () => {
@@ -66,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, userProfile, isAdmin, loading, role, permissions, hasPermission, login, logout, register, forgotPassword }}>
+    <AuthContext.Provider value={{ currentUser, userProfile, isAdmin, loading, role, permissions, hasPermission, login, loginWithGoogle, logout, register, forgotPassword }}>
       {children}
     </AuthContext.Provider>
   );
