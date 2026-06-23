@@ -45,7 +45,7 @@ Production-ready ecommerce platform built with React, TypeScript, Firebase, and 
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS
 - **Build**: Vite
-- **Backend**: Firebase (Auth, Firestore, Storage)
+- **Backend**: Firebase (Auth, Firestore), Cloudinary (Image Storage)
 - **Routing**: React Router v7
 - **Icons**: Heroicons
 - **CSV Parsing**: PapaParse
@@ -71,10 +71,18 @@ npm install
 1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
 2. Enable **Authentication** (Email/Password provider)
 3. Enable **Cloud Firestore**
-4. Enable **Firebase Storage**
-5. Copy your Firebase config values
+4. Copy your Firebase config values
 
-### 3. Environment Variables
+### 3. Cloudinary Setup
+
+1. Create a free account at [cloudinary.com](https://cloudinary.com)
+2. In your Cloudinary dashboard, note your **Cloud Name**
+3. Go to **Settings → Upload** and create an **unsigned upload preset**
+   - Set the folder to `products` (optional, for organization)
+   - Enable "Use filename or externally defined public ID" if desired
+4. Copy the upload preset name
+
+### 4. Environment Variables
 
 Copy `.env.example` to `.env` and fill in your values:
 
@@ -87,13 +95,15 @@ cp .env.example .env
 | `VITE_FIREBASE_API_KEY` | Firebase API key |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain |
 | `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket (kept for config compatibility) |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging sender ID |
 | `VITE_FIREBASE_APP_ID` | Firebase App ID |
 | `VITE_ADMIN_EMAIL` | Email that gets SUPER_ADMIN role on registration |
 | `VITE_OPENAI_API_KEY` | (Optional) OpenAI API key for AI product generator |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Cloudinary unsigned upload preset name |
 
-### 4. Firestore Security Rules
+### 5. Firestore Security Rules
 
 Deploy these rules to your Firestore:
 
@@ -158,13 +168,13 @@ service cloud.firestore {
 }
 ```
 
-### 5. Run Development Server
+### 6. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-### 6. Build for Production
+### 7. Build for Production
 
 ```bash
 npm run build
