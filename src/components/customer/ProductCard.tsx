@@ -22,13 +22,13 @@ export default function ProductCard({ product }: Props) {
     setTimeout(() => setAdded(false), 1500);
   };
 
-  const mainImage = product.images?.[0] || 'https://placehold.co/400x400/FDE8E8/E76F51?text=Sin+imagen';
+  const mainImage = product.images?.[0] || 'https://placehold.co/400x400/1A1A1A/FF008C?text=Sin+imagen';
 
   return (
     <Link to={`/product/${product.id}`} className="group block">
       <div className="card overflow-hidden">
         {/* Image */}
-        <div className="relative overflow-hidden aspect-square bg-secondary-50">
+        <div className="relative overflow-hidden aspect-square bg-gray-100">
           <img
             src={mainImage}
             alt={product.name}
@@ -65,11 +65,11 @@ export default function ProductCard({ product }: Props) {
         {/* Info */}
         <div className="p-4">
           <p className="text-xs text-gray-400 mb-1">{product.category} · {product.sku || product.code}</p>
-          <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2 text-sm leading-snug mb-2">
+          <h3 className="font-medium text-gray-900 group-hover:text-primary-500 transition-colors line-clamp-2 text-sm leading-snug mb-2">
             {product.name}
           </h3>
           <div className="flex items-center justify-between">
-            <span className="font-bold text-primary-600 text-lg">{formatCurrency(product.publicPrice)}</span>
+            <span className="font-bold text-primary-500 text-lg">{formatCurrency(product.publicPrice)}</span>
             <span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
               {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
             </span>

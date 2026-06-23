@@ -4,6 +4,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './config';
@@ -29,7 +31,46 @@ export async function registerUser(
 }
 
 export async function loginUser(email: string, password: string): Promise<void> {
-  await signInWithEmailAndPassword(auth, email, password);
+  const credential = await signInWithEmailAndPassword(auth, email, password);
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  if (email === adminEmail) {
+    await setDoc(doc(db, 'users', credential.user.uid), {
+      uid: credential.user.uid,
+      email,
+      displayName: credential.user.displayName || email,
+      role: 'SUPER_ADMIN' as UserRole,
+      active: true,
+      createdAt: serverTimestamp(),
+    }, { merge: true });
+  }
+}
+
+export async function loginWithGoogle(): Promise<void> {
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  const user = result.user;
+  const email = user.email || '';
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const role: UserRole = email === adminEmail ? 'SUPER_ADMIN' : 'CUSTOMER';
+
+  const userRef = doc(db, 'users', user.uid);
+  const existingDoc = await getDoc(userRef);
+
+  if (!existingDoc.exists()) {
+    await setDoc(userRef, {
+      uid: user.uid,
+      email,
+      displayName: user.displayName || email,
+      role,
+      active: true,
+      createdAt: serverTimestamp(),
+    });
+  } else {
+    // If admin email, ensure role is updated
+    if (email === adminEmail) {
+      await setDoc(userRef, { role: 'SUPER_ADMIN', active: true }, { merge: true });
+    }
+  }
 }
 
 export async function logoutUser(): Promise<void> {

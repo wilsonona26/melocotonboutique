@@ -9,10 +9,10 @@ interface AdminRouteProps {
 }
 
 export default function AdminRoute({ children, requiredPermission }: AdminRouteProps) {
-  const { loading, currentUser, hasPermission, userProfile } = useAuth();
+  const { loading, currentUser, hasPermission, userProfile, role } = useAuth();
   if (loading) return <LoadingSpinner fullScreen />;
   if (!currentUser) return <Navigate to="/login" replace />;
-  if (!hasPermission('canAccessAdmin')) return <Navigate to="/" replace />;
+  if (role !== 'SUPER_ADMIN') return <Navigate to="/" replace />;
   if (userProfile && !userProfile.active) return <Navigate to="/" replace />;
   if (requiredPermission && !hasPermission(requiredPermission)) return <Navigate to="/admin" replace />;
   return <>{children}</>;
