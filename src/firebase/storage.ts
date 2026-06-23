@@ -6,6 +6,12 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
  * Returns the secure URL of the uploaded image.
  */
 export async function uploadProductImage(file: File, productId: string): Promise<string> {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error(
+      'Cloudinary is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET environment variables.'
+    );
+  }
+
   const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
 
   const formData = new FormData();
@@ -16,7 +22,7 @@ export async function uploadProductImage(file: File, productId: string): Promise
   const response = await fetch(url, { method: 'POST', body: formData });
 
   if (!response.ok) {
-    throw new Error('Failed to upload image to Cloudinary');
+    throw new Error(`Failed to upload image to Cloudinary: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
