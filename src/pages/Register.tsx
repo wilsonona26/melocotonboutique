@@ -38,10 +38,14 @@ export default function Register() {
       navigate('/');
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
+      const message = (err as { message?: string })?.message;
+      console.error('[Register] Google login error:', code, message);
       if (code === 'auth/popup-closed-by-user') {
         // User closed popup
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('Este dominio no está autorizado para Google Sign-In. Verifica la configuración en Firebase Console.');
       } else {
-        setError('Error al registrarse con Google.');
+        setError(`Error al registrarse con Google: ${code || message || 'Error desconocido'}`);
       }
     } finally {
       setLoading(false);
